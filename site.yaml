@@ -1,0 +1,37 @@
+---
+- name: Test Connectivity and Add Loopback to Routers
+  hosts: routers
+  gather_facts: no
+
+  tasks:
+    - name: Configure hostname
+      ios_config:
+        lines:
+          - hostname {{ device_hostname }}
+
+    - name: Configure description on Ethernet0/0
+      ios_config:
+        parents:
+          - interface Ethernet0/0
+        lines:
+          - description {{ interface_description }}
+
+    - name: Verify hostname
+      ios_command:
+        commands:
+          - show running-config | include hostname
+      register: hostname_output
+
+    - name: Show hostname output
+      debug:
+        var: hostname_output.stdout_lines
+
+    - name: Verify Ethernet0/0 description
+      ios_command:
+        commands:
+          - show running-config interface Ethernet0/0
+      register: int_output
+
+    - name: Show interface Ethernet0/0 config
+      debug:
+        var: int_output.stdout_lines    
